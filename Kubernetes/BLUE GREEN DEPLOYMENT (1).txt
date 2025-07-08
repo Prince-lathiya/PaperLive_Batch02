@@ -165,7 +165,7 @@ pipeline {
         AWS_REGION = "us-east-1"
         EKS_CLUSTER = "eks-kastro"
         K8S_NAMESPACE = "blue-green-demo"
-        DOCKER_IMAGE = "kastrov/blue-green-demo:${params.DEPLOY_ENV}-${BUILD_NUMBER}"
+        DOCKER_IMAGE = "princelathiya/blue-green-demo:${params.DEPLOY_ENV}-${BUILD_NUMBER}"
         GUNICORN_TIMEOUT = "120"
         HEALTH_CHECK_TIMEOUT = "10" // Increased from 5
     }
@@ -174,7 +174,7 @@ pipeline {
         stage('Git Checkout') {
             steps {
                 echo 'Checking out code...'
-                git 'https://github.com/KastroVKiran/blue-green-app.git'
+                git 'https://github.com/Prince-lathiya/blue-green-app.git'
             }
         }
 
@@ -297,12 +297,12 @@ pipeline {
                     // Health check with retries
                     sh """
                     for i in {1..5}; do
-                        if curl -sSf --max-time 10 http://${lbUrl}/health; then
+                        if curl -sSf --max-time 20 http://${lbUrl}/health; then
                             echo "Health check passed"
                             exit 0
                         fi
                         echo "Health check attempt \$i failed, retrying..."
-                        sleep 10
+                        sleep 20
                     done
                     echo "Health check failed after 5 attempts"
                     exit 1
