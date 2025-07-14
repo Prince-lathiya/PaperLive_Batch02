@@ -1,0 +1,454 @@
+================
+Ansible_Day 03
+================
+
+====================
+Notify and Handlers
+====================
+20 tasks ----> task 1 git, task 2 maven, task 3 java, task4 httpd, ....... task 18 start apache, task 19 install nginx, task 20 install docker 
+	NOTIFY and HANDLERS
+
+task 1 git .... task 5 git version ....
+
+====================
+Conditions - WHEN module
+====================
+Cluster - group of servers (RH, Debian, Fedora...)
+
+Categories of clusters;
+homogenous		- servers with same OS and flavour
+heterogenous		- servers with different OS and flavour
+
+====================
+LAMP Stack
+====================
+LAMP stack is a software bundle which is used for hosting web applications
+L - Linux (OS)
+A - Apache (WebServer)
+M - MySQL or MangoDB (Database)
+P - Python or PHP (Server side scripting language)
+
+Write a playbook to install apache, MySQL, php
+
+====================
+LOOKUP Module
+====================
+credentials.txt ---- username: kastro, password: kastro
+To read a file using playbook we will use LOOKUP module
+
+
+====================
+Ansible Strategies
+====================
+1. Linear*
+2. Free
+3. Sequence
+4. Batch
+5. Rolling
+
+====================
+Ansible Roles
+====================
+Separate playbooks for each module
+yum -- pb1
+apt -- pb2
+service -- pb3
+debug -- pb4
+when -- pb5
+
+standard directory structure --- master.yml
+
+3 roles --- packages installation, users creation, httpd installation
+
+====================
+Ansible Galaxy
+====================
+If you dont want to manually create a directory structure, we will use ansible galaxy
+Consists of a repo with prebuilt roles
+
+====================
+Ansible Vault
+====================
+Ansible vault will encrypt the yml files
+Ansible vault is used to store the files
+
+
+====================
+Polling and Asynchronous
+====================
+For every task in ansible, we can set a time limit
+if the task is not performed in that time limit, ansible will stop playbook execution - This concept is called as asynchronous and polling
+
+
+Ansible Project
+================
+Ansible Project
+***********************************************************************
+=> 1. Launch 3VMs (Jenkins, Tomcat 1, Tomcat 2). Amazon Linux 2 AMI, t2.mirco, 25 Gi, No of instances: 3
+***********************************************************************
+Rename VMs as, Jenkins + Ansible, Tomcat 1, Tomcat 2
+
+war file will get generated in Jenkins VM. Using Ansible playbook, we will setup tomcat automatically in two VMs (Tomcat 1, Tomcat 2). We will write another playbook for copying the war file to Tomcat VMs. 
+***********************************************************************
+=> 2. Connect to all the VMs and set the hostnames
+***********************************************************************
+sudo su
+sudo yum update -y
+cd
+hostnamectl set-hostname jenkins ---> sudo -i
+hostnamectl set-hostname tomcat1 ---> sudo -i
+hostnamectl set-hostname tomcat2 ---> sudo -i
+
+Connect to Jenkins VM ----> vi jenkin.sh ---->
+sudo -s   
+sudo yum update
+***********************************************************************
+=> Step 3: Jenkins installation on Jenkins VM
+***********************************************************************
+Install Git, Java 17 and Maven in server
+sudo -s   
+sudo yum update
+yum install git java-17-amazon-corretto maven -y
+  
+Jenkins installation
+Official documentation for commands 
+(Jenkins.io ---> download ---> RedHat) show in browser Jenkins.io ---> LTS Redhat (URL: https://www.jenkins.io/doc/book/installing/linux/#red-hat-centos)
+
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+
+sudo yum upgrade
+
+yum install jenkins -y
+
+systemctl start jenkins.service
+
+systemctl status jenkins.service  
+You should see "active (running)" in green colour 
+
+NOTE: chkconfig jenkins on
+The above command will make Jenkins service automatically restart itself whenever a server is stopped and restarted
+
+Setup Jenkins Dashboard
+Setup Credentials
+Install suggested plugins
+Create admin user
+Access the jenkins dashboard
+
+Install ansible on the same VM ----> amazon-linux-extras install ansible2 -y ----> yum install  python3 python-pip  python-dlevel -y ----> Verify Installation ----> ansible --version
+
+Lets establish the communication between Jenkins VM (which is Ansible Master Node) and Tomcat VMs (which are Ansible Worker Nodes)
+
+On all VMs ----> Lets set the password ----> passwd root ----> Type and retype the password (Password: kastro123). You will see "all authentication tokens updated successfully." ----> Remember we already have the username: ec2-user
+
+Step 4: After that we need to enable master server to connect with client server using 'root' user, only then the when we run any commands on Master will get executed on Workers. But by default in any Linux VMs 'root' login is disabled. So we need to enable it. If root user wants to login to the servers, we need to edit one file which is known as sshd file. It is the file which is having the properties for login of root user. If root user wants to login to the other servers, it is mandatory to edit this file
+Execute the below commands; (Execute in all VMs)
+vi /etc/ssh/sshd_config (Execute in all tabs of Moba) ----> Goto line 38 ---> :38 ----> You will see '#PermitRootLogin yes' which is commented as #. So remove # at the beginning of this line. ----> Goto line 63 ---> :63 ----> You will see 'Password Authentication' as no. Change it to yes [If you dont find it on 63, it will be there in line 61] --->esc ---> :wq ---> systemctl restart sshd ----> systemctl status sshd ----> You will see "acive-running" in all tabs of moba ----> To see the hostname of all VMs ----> hostname -i ----> Exit from "Multi-Exec Mode in Moba" and be in Master VM tab
+
+Step 5: Generate the keys in Master and Copy the same key and run in Workers
+Whenever ansible wants to connect with worker nodes, we have to generate keys on ansible main server.
+Execute the below on ansible main server tab in Moba ---> ssh-keygen ---> Click enter 3 times (do not type anything) ----> Lets copy the ssh key ----> 
+Now to connect to the worker node 1 i.e Tomcat1 VM ---> Execute in ansible main tab of moba ---> ssh-copy-id root@<PrivateIPofTomcat1-VM> ---> yes ---> Enter the password which was set previously ---> You can see 'Number of keys added:1'. Now we can say the connection of dev1 is done with ansible main server.
+
+Now i want to communicate with my Tomcat2 VM using ansible main server ---> Execute in ansible main tab of moba ---> 
+ssh-copy-id root@<PrivateIPofTomcat2-VM> ---> yes ---> Enter the password which was set previously ---> You can see 'Number of keys added:1'. Now we can say the connection of dev2 is done with ansible main server.
+
+Step 6: Working with ansible host/inventory file (Execute in Ansible Master)
+We need to communicate with worker nodes from the ansible main server, to do that we need to work with Inventory file. This file will be available in; vi /etc/ansible/hosts ---> go to the next line of  # Ex 1: Ungrouped hosts, specify before any headers
+Currently we have 2 VMs related to dev group and 2 VMs related to test group. Lets add them
+[tomcat-servers]
+<Tomcat1 VM Private ip>
+<Tomcat2 VM Private ip>
+---> :wq
+With this inventory file is ready
+Why we are configuring private IPs? Because any 2 VMs will communicate with each other using Private IPs only. 
+
+Lets verify the final connection ----> 
+To see the list of Ansible nodes connected to the Ansible master ----> ansible all -m ping
+If successful, you'll see a result similar to this for each node:
+node1 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+node2 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+
+This is all about establishing the connection b/w ansible master and workers
+
+***********************************************************************
+=> 4. Jenkins Dashboard
+***********************************************************************
+Create a pipeline job with below script; (hotstar project) --- without Ansible deployment stage. 
+The below script is meant to generate the war file;
+#Ansible Project
+
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/KastroVKiran/Hotstar-App.git'
+            }
+        }
+        stage('Compile') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Package') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('Deployment') {
+            steps {
+                echo "Deployed to Ansible Servers"
+            }
+        }
+    }
+}
+
+---> Build the job
+***********************************************************************
+=> 5. Lets setup Tomcat using ansible playbook
+***********************************************************************
+One important thing from below playbook is, in tomcat we have tomcat-users.xml file. We will generally edit that file. But if we keep the same thing related to editing of that file in playbook, it looks clumsy. Instead of that, i will create a file on my VM with name as "tomcat-users.xml" in /root path with modified content of username and password. And i will ask playbook to get that file from local and copy it to /root/tomcat/conf/tomcat-users.xml.
+Similar thing i will do for context.xml file also
+
+On Jenkins VM ----> vi tomcat.yml ---->
+---
+- name: Setup Tomcat
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install Java (Amazon Corretto 17)
+      yum:
+        name: java-17-amazon-corretto
+        state: present
+
+    - name: Remove existing Tomcat directory if present
+      file:
+        path: /root/tomcat
+        state: absent
+
+    - name: Remove old Tomcat archive if present
+      file:
+        path: /root/apache-tomcat-9.0.107.tar.gz
+        state: absent
+
+    - name: Download Tomcat 9.0.107 archive
+      get_url:
+        url: "https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.107/bin/apache-tomcat-9.0.107.tar.gz"
+        dest: "/root/"
+
+    - name: Extract Tomcat archive
+      command: tar -zxvf apache-tomcat-9.0.107.tar.gz
+      args:
+        chdir: "/root/"
+
+    - name: Rename extracted directory to 'tomcat'
+      command: mv apache-tomcat-9.0.107 tomcat
+      args:
+        chdir: "/root/"
+
+    - name: Copy tomcat-users.xml
+      copy:
+        src: /root/tomcat-users.xml
+        dest: /root/tomcat/conf/tomcat-users.xml
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Copy context.xml
+      copy:
+        src: /root/context.xml
+        dest: /root/tomcat/webapps/manager/META-INF/context.xml
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Update Connector in server.xml to listen on 0.0.0.0
+      replace:
+        path: /root/tomcat/conf/server.xml
+        regexp: '(<Connector port="8080" protocol="HTTP/1.1")'
+        replace: '\1 address="0.0.0.0"'
+
+    - name: Create Tomcat systemd service
+      copy:
+        dest: /etc/systemd/system/tomcat.service
+        content: |
+          [Unit]
+          Description=Apache Tomcat Server
+          After=network.target
+
+          [Service]
+          Type=forking
+          User=root
+          Group=root
+          Environment="JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto"
+          Environment="CATALINA_HOME=/root/tomcat"
+          ExecStart=/root/tomcat/bin/startup.sh
+          ExecStop=/root/tomcat/bin/shutdown.sh
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Start and enable Tomcat
+      systemd:
+        name: tomcat
+        state: started
+        enabled: yes
+
+---> esc ----> :wq ----> If you run the playbook, we will get the errors. Because we havent created tomcat-users.xml and context.xml files in root path of Jenkins VM ----> Lets create them ----> 
+
+vi tomcat-users.xml ----> 
+<?xml version="1.0" encoding="UTF-8"?>
+<tomcat-users xmlns="http://tomcat.apache.org/xml"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
+              version="1.0">
+  <role rolename="manager-gui"/>
+  <role rolename="manager-script"/>
+  <user username="tomcat" password="root123456" roles="manager-gui, manager-script"/>
+</tomcat-users>
+
+---> esc ----> :wq
+
+vi context.xml ----> 
+<?xml version="1.0" encoding="UTF-8"?>
+<Context antiResourceLocking="false" privileged="true" >
+  <CookieProcessor className="org.apache.tomcat.util.http.Rfc6265CookieProcessor"
+                   sameSiteCookies="strict" />
+  <Manager sessionAttributeValueClassNameFilter="java\.lang\.(?:Boolean|Integer|Long|Number|String)|org\.apache\.catalina\.filters\.CsrfPreventionFilter\$LruCache(?:\$1)?|java\.util\.(?:Linked)?HashMap"/>
+</Context>
+
+---> esc ----> :wq
+
+Now we can run the playbook ----> ansible-playbook tomcat.yml ----> This will install tomcat complete setup using this playbook in Tomcat 1 and Tomcat 2 VM
+Open 8080 for Tomcat1 and Tomcat2 VMs and access Tomcat1 and Tomcat2 in browser. Access the Tomcat Admin Dashboard
+***********************************************************************
+=> 6. Lets deploy the war file to tomcat servers (manual deployment)
+***********************************************************************
+The war file is in /var/lib/jenkins/workspace/ ---> cd <JobName> ----> ls ----> You will see the war file
+
+Lets create a playbook to copy this war file and deploy into tomcat servers ----> 
+vi deploy.yml ----> 
+---
+- name: Deploying war file to Tomcat Servers
+  hosts: all
+  tasks:
+    - name: Deploying war to Tomcats
+      copy:
+        src: /var/lib/jenkins/workspace/ansi/target/myapp.war
+        dest: /root/tomcat/webapps
+
+ ----> ansible-playbook deploy.yml ----> Now the war file will get copied to all tomcat servers
+
+Goto Tomcat tabs in browser and refresh the pages, you will see the app name. Click on the app name and access the app. This is how we can deploy war files tomcat.
+
+Now, assume developer has made the changes to code, and i will build the job. Whenever we run the pipeline, a new war file will get deployed. But will that new war file gets deployed into the servers? NO. We havent made any such configuration to deploy the latest war file in to the tomcat server. Everytime developer makes the changes, we have to manually run the "deploy.yml" playbook, which is complex. 
+To avoid this, lets write a stage in jenkins, to run the "deploy.yml" playbook automatically whenever the job is built again based on the code change in github repo. Before that, lets undeploy the current app in tomcat browsers.
+
+Goto Tomcat browsers, and click on "undeploy" in both tomcat browsers.
+
+***********************************************************************
+=> 7. Lets deploy the war file to tomcat servers (automated deployment) - using jenkinsfile
+***********************************************************************
+Lets install the plugin called "ansible"
+and then restart jenkins after the plugins are installed
+
+We need to configure ansible in jenkins, where we will configure the path to run the deploy.yml file, so that jenkins will run automatically the deploy.yml file
+
+Manage Jenkins ----> System Configuration ----> Tools ----> Scroll down to "Ansible Installations" ----> Add Ansible ----> Name: ansible, Path: /bin ----> Apply ----> Save
+
+Jenkins should communicate with tomcat servers. Because jenkins should login to the tomcat servers and then copy the war file. So jenkins should have permissions to login to the tomcat servers and get the war file. To get this, we need to do credentials configuration of tomcat VMs (remember, we dont have to configure tomcat credentials.)
+The user name for VMs is root, and password is kastro123
+
+Manage Jenkins ----> Security ----> Credentials ----> Global ----> 
+Kind: SSH Username with private key
+Username: ec2-user
+Private Key: Enter directly or paste from your .pem file (e.g., my-key.pem)
+ID: linux-creds
+Description: linux-creds
+Click OK
+
+Lets keep the "deploy.tml" in the path of /etc/ansible/ which is preferred in the real-time scenarios; ----> Goto Jenkins tab in Moba ----> ls ----> You will see the "deploy.yml" ----> cp deploy.yml /etc/ansible/ ----> cd /etc/ansible ----> ls ----> You wll see the "deploy.yml" file
+
+Lets write the stage using pipeline syntax;
+Open pipeline syntax in new tab ----> Sample step: ansiblePlaybook: Invoke an ansible playbook, Ansible tool: ansible, Playbook file path workspace: /etc/ansible/deploy.yml, Inventory file path workspace: /etc/ansible/hosts, SSH connection credentials: select 'linux-creds' in drop down ----> Generate the syntax and copy and paste it to the last stage which we have written as "Deploy to Ansible". Remove "echo" line completely
+You will see the generated syntax as shown below;
+ansiblePlaybook credentialsId: 'linux-creds', installation: 'ansible', inventory: '/etc/ansible/hosts', playbook: '/etc/ansible/deploy.yml', vaultTmpPath: ''
+In the jenkins pipeline when pasting the above script, add one extra condition (as shown below) to provide the root privelages
+                    extraVars: [
+                        ansible_become: 'true'
+                    ]
+-------------------------------
+Final Pipeline 
+-------------------------------
+pipeline {
+    agent any
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/KastroVKiran/Hotstar-App.git'
+            }
+        }
+        stage('Compile') {
+            steps {
+                sh 'mvn compile'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+        stage('Package') {
+            steps {
+                sh 'mvn clean package'
+            }
+        }
+        stage('Deployment') {
+            steps {
+                ansiblePlaybook(
+                    credentialsId: 'linux-creds',
+                    installation: 'ansible',
+                    inventory: '/etc/ansible/hosts',
+                    playbook: '/etc/ansible/deploy.yml',
+                    vaultTmpPath: '',
+                    extraVars: [
+                        ansible_become: 'true'
+                    ]
+                )
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

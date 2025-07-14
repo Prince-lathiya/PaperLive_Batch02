@@ -1,0 +1,122 @@
+================
+Ansible_Day 01
+================
+
+Linux
+Shell Scripting (as a self practice)
+AWS
+Git & GitHub 
+Maven
+Tomcat
+Jenkins
+Nexus
+SonarQube
+Docker
+K8s (ArgoCD & Prometheus & Grafana)
+
+Ansible		- 4 days
+Terraform	- 4 days
+
+Python (as a self practice)
+
+AWS CI&CD Project - 1 day
+
+=================
+ANSIBLE
+=================
+Jenkins ----> CI & CD Pipelines
+Docker ----> Containerization of Applications
+K8s ----> Management of Containerized Applications
+
+20 servers ----> Git, Maven, Java, Jenkins, Tomcat, Docker... ----> Downloading and the Installation of multiple packages on all these servers is a complex process and also time taking process ----> To automate the process of installing and setup of multiple packages we will use ANSIBLE
+
+Ansible is a Configuration Management Tool (OR) IT Automation Tool
+Free and open-source tool
+Configuration Management Tool: Chef, Puppet, Salt, Ansible*...
+Michael Dehaan - 2012
+Managed by RedHat
+Free & Premium 
+Ansible is cloud indendent
+To work with Ansible, we need to install Python
+GUI ----> Docker - Portrainer, Ansible - Ansible Tower
+In ansible we will use YML
+.yml or .yaml ---> Playbooks
+Ansible is Agent less
+
+===================
+Architecture of Ansible
+===================
+Ansible works on Master and Slave Architecture
+Playbook ---> Execute on Master Node ----> Configurations will get executed on Worker Nodes
+
+How the ansible main server will be connected to the worker nodes?
+	- SSH Connection
+
+In ansible there are two important things;
+	1. Playbook --- represent what you want to do
+	2. Inventory file --- represent where you want to do --- list of servers with private IPs
+						ansible.cfg contains info about inventory file
+
+
+===================
+Ansible Setup
+===================
+amazon-linux-extras install ansible2 -y
+yum install  python3 python-pip  python-dlevel -y
+
+Verify Installation
+ansible --version
+
+To see the uptime of specific hosts
+ansible dev -a "uptime"
+ansible test -a "uptime"
+
+# Check disk space
+ansible all -a "df -h"
+
+===============================
+Working with Ansible
+===============================
+We can work with Ansible in 3 different ways;
+1. Adhoc Commands	- simple Linux commands - for temporary usage (-a)
+2. Modules (-m)
+3. Playbooks
+
+Modules
+key-value pairs
+
+name: kastro
+email: kastro@gmail.com
+profession: devops engineer
+
+ansible all -m yum -a "name=git state=present"
+
+States:
+yum is the module name (States for package management)
+present --- install
+absent --- uninstall
+latest --- install/update
+
+
+Services modules (states for service management)
+started --- start
+stopped --- stop
+restarted --- restart
+enabled --- enable
+
+Understanding colour patterns in ansible;
+yellow - successful
+red - failed
+green - already done
+blue - skipped
+
+
+
+
+
+
+
+
+
+
+

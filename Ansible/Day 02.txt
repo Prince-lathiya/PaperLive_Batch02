@@ -1,0 +1,58 @@
+================
+Ansible_Day 02
+================
+Playbooks;
+Playbook contains tasks
+Playbook is a collection of multiple modules
+We can execute multiple modules at the same time
+We can reuse the playbook
+Playbooks are written using YML
+Extension as .yml or .yaml
+Ansible playbook will start with --- and ends with ...
+Playbook is case sensitive 
+
+Write a playbook to setup nginx and to start nginx with custom <Message Print>
+
+================
+SETUP Module
+================
+This module will show the system info about the worker nodes
+
+================
+ANSIBLE TAGS
+================
+20 tasks --- 5 tasks --- Ansible tags
+Tags are used to execute or skip specific tasks
+
+
+================
+VARIABLES
+================
+a = kastro
+b = kiran
+c = devops engineer
+d = devops trainer
+
+The concept of using variable is, in future if i want to change the tool/package, i can only change the variable assigned the value
+
+Static		- defined inside the playbook
+Dynamic		- not defined inside the playbook
+
+================
+LOOPS
+================
+Loops are used to reduce the lines of code
+install 10 tools --- we need to write 10 tasks ----> instead of this, i will use loops concept
+
+===============================
+Writing playbook using Adhoc Commands
+===============================
+SHELL
+COMMAND
+RAW
+
+With the help of raw module, we can directly work with worker nodes "without installing python on master node"
+
+
+
+
