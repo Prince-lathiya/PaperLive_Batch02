@@ -191,7 +191,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/KastroVKiran/Hotstar-App.git'
+              git 'https://github.com/Prince-lathiya/Hotstar-App.git'
             }
         }
         stage('Compile') {
