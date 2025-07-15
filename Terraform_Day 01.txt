@@ -1,0 +1,95 @@
+=================
+Terraform + ChatGPT
+=================
+100 Servers -----> Install packages (git, tomcat, java, maven, Jenkins...) -----> Ansible
+
+100 Servers ----> Amazon Linux 2023, t2.medium, keypair, SG, VPC, Subnet, EBS... ----> Automate the infrastructure creation ----> Terraform
+Cloud Formation -----> AWS Cloud
+
+Terraform is IAAC software
+It is developed by Hashicorp Company
+It used HCL to provision the infrastructure
+Terraform is cloud independent
+
+Components of Terraform Architecture;
+1. Configuration files
+	- .tf
+	- HCL
+
+2. Terraform CLI
+	- execute the terraform commands
+	- acts like an interface to interact with terraform
+
+3. Providers
+	- plugins that allow terraform to interact with cloud platforms
+	- provider block
+		- provider "aws"
+
+4. Backend
+	- determines where terraform state file is stored
+		- tfstate file tracks the real-world resource states\
+		- terraform.tfstate
+		- json
+
+5. Terraform registry
+	- public repo of modules and providers
+
+Workflow;
+write ---- define structure using .tf files
+init ---- initialize terraform
+plan ---- to preview the infrastructure
+apply ---- to create/update the infrastructure
+destroy ---- to destroy all the resources created using tf file
+
+Write -----> Plan -----> Apply -----> Destroy
+
+Basic terraform commands;
+terraform init
+terraform validate		- verify the syntax 
+terraform fmt			- formatting check
+terraform plan			- to preview the infrastructure 
+terraform apply		- create the resources
+terraform destroy		- destroys the infrastructure 
+
+Installation of terraform;
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+sudo yum install -y terraform
+terraform version  
+
+Key terraform files;
+main.tf --- main configuration
+variables.tf --- input
+output.tf ---
+provider.tf ---
+terraform.tfvars ---
+
+terraform destroy --auto-approve -target=<PasteTheInstanceInfo>
+
+
+https://github.com/KastroVKiran/Jenkins-Terraform-EKS.git
+
+https://github.com/KastroVKiran/DevOps-Project-Swiggy.git
+https://github.com/KastroVKiran/Terraform-Script-Swiggy-Kastro.git
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
