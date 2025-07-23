@@ -3,6 +3,10 @@
 Welcome to the **AWS & DevOps - Batch 02** repository by **PaperLive**!  
 Unlock the world of Cloud, Automation, and Infrastructure with real-world projects and hands-on labs.
 
+Python Playlist
+https://www.youtube.com/watch?v=QXeEoD0pB3E&list=PLsyeobzWxl7poL9JTVyndKe62ieoN-MZ3
+
+https://www.youtube.com/watch?v=4EaYeZyzIB0&list=PLBlnK6fEyqRiueC_HzwFallNO76hfXBB7
 ---
 
 ## 📚 Course Modules
